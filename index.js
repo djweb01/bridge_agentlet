@@ -39,7 +39,6 @@ io.on('connection', async function(socket){
                             fileList: fileList,
                             vdbList:vdbList
                         });
-                        
                     }
                   });
             }
@@ -56,7 +55,6 @@ io.on('connection', async function(socket){
                 await socket.emit("connectvdb", { 
                     fileList: fileList,
                 });
-                
             }
           });
     }
@@ -95,13 +93,11 @@ io.on('connection', async function(socket){
     async function onVDB(arg){
         let python 
         let stdin_content = [process.cwd()+'/python/readvdb.py',arg.filename,arg.question]
-        
         python = spawn('python3', stdin_content);
-
-   
         python.stdout.on('data', function (data) {
             console.log('Pipe data from python script ...');
             let result = data.toString().substring(0, data.length - 1)
+            
             if(result.slice(0,6) === "error"){
                 socket.emit("responsetxt", "查询失败");
             }else{
@@ -126,7 +122,6 @@ io.on('connection', async function(socket){
 
     }
     async function onConnect(arg){
-        console.log("connect");
         let type = arg.filename.split(".")[1]
         var filecontent
         if(type){
@@ -158,10 +153,9 @@ io.on('connection', async function(socket){
     
     }
 
-    function generatevdb(vdbname,filecontent,vdbfilename){
-        console.log(vdbname)
+    function generatevdb(vdbname,filecontent,vdbfilename,splitorInput,maxLength,overlapLength){
         let python 
-        let stdin_content = [process.cwd()+'/python/generatevdb.py',vdbname,filecontent,vdbfilename]
+        let stdin_content = [process.cwd()+'/python/generatevdb.py',vdbname,filecontent,vdbfilename,splitorInput,maxLength,overlapLength]
         python = spawn('python3', stdin_content);
         python.stdout.on('data', function (data) {
             console.log('Pipe data from python script ...');
@@ -239,7 +233,7 @@ io.on('connection', async function(socket){
                     let dataBuffer = fs.readFileSync(Folderdir+arg.filename);
 
                     PDFParser(dataBuffer).then(function(data) {
-                        generatevdb(arg.vdbname,data.text,arg.vdbfilename)
+                        generatevdb(arg.vdbname,data.text,arg.vdbfilename,arg.splitorInput,arg.maxLength,arg.overlapLength)
                     }).catch(function(error){
                             // handle exceptions
                             console.log(error)
