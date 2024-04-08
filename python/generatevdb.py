@@ -40,10 +40,46 @@ def main():
         TEXT=[]
         index_T=[]
         titleList = re.findall(splitorInput, txt, re.I)
+        symbol_S = ""
+        symbol_E = ""
+        stop_index = 0
+        
+        pattern = r'[^\\w\\s]'
+        for i in d:
+            if stop_index <3:
+                if stop_index == 0 and i == '\\':
+                    stop_index = 1
+                elif stop_index == 1 and bool(re.match(pattern,i)):
+                    stop_index = 0
+                    symbol_S += i
+                else:
+                    stop_index = 3
+            else:
+                break
+        
+        stop_index = 0
+        d = d[::-1]
+        for i in range(len(d)):
+            if i %2 == 1:
+                f = d[i-1]
+                d[i-1] = d[i]
+                d[i] = f
+
+        for i in d:
+            if stop_index <3:
+                if stop_index == 0 and i == '\\':
+                    stop_index = 1
+                elif stop_index == 1 and bool(re.match(pattern,i)):
+                    stop_index = 0
+                    symbol_E += i
+                else:
+                    stop_index = 3
+            else:
+                break
         newtitleList =  titleList.copy()
         index = 0
         for t in titleList:
-            index_T.append(re.search(t, txt))  #(0, 3)
+            index_T.append(re.search(symbol_S+t+symbol_E, txt))  #(0, 3)
             if len(index_T)>1:
                 if (index_T[index].start()-1) - (index_T[index-1].end()+1) > 500:
                     n = math.ceil(((index_T[index].start()-1) - (index_T[index-1].end()+1))/500)
@@ -53,6 +89,7 @@ def main():
                            
                             TEXT.append(txt[init+j*500: index_T[index].start()-1]) 
                         else:
+                            
                             TEXT.append(txt[init+j*500:init+(j+1)*500])
                             newtitleList.insert(index-1,titleList[index-1])
                         
@@ -62,6 +99,8 @@ def main():
             
 
         TEXT.append(txt[index_T[index-1].end()+1:-1]) 
+        newtitleList
+        vdbname
         meta_data = metadata(TEXT,newtitleList,vdbname)
     
         
@@ -69,6 +108,7 @@ def main():
 
     embedding_function = HuggingFaceEmbeddings(model_name="BAAI/bge-base-zh-v1.5")
 
+    # # 持久化数据
     docsearch = Chroma.from_texts(
                                 texts=TEXT,
                                 embedding=embedding_function,
