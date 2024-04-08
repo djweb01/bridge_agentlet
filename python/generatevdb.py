@@ -37,6 +37,7 @@ def main():
         TEXT = text_splitter.split_text(txt)
         meta_data = metadata(TEXT,vdbfilename)
     else:
+        d = list(splitorInput)
         TEXT=[]
         index_T=[]
         titleList = re.findall(splitorInput, txt, re.I)
